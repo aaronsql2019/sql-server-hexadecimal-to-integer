@@ -1,0 +1,78 @@
+IF OBJECT_ID('dbo.udfHex2Int') IS NOT NULL
+        DROP FUNCTION dbo.udfHex2Int
+
+GO
+CREATE FUNCTION dbo.udfHex2Int
+(
+  @hexstr AS varchar(1000)
+)
+-- Function converts VARCHAR representation of HEX to INT
+-- 'FF'  --> 255
+
+RETURNS INT
+AS
+BEGIN
+
+  IF @hexstr IS NULL RETURN NULL
+
+  DECLARE
+    @curbyte AS int,
+    @varbin  AS varbinary(500)
+
+  IF @hexstr LIKE '0x%' SET @hexstr = SUBSTRING(@hexstr, 3, 8000)
+
+  SET @hexstr =
+    CASE LEN(@hexstr) % 2 WHEN 1 THEN '0' ELSE '' END + @hexstr
+
+  SET @varbin = 0x
+  SET @curbyte = LEN(@hexstr) / 2
+
+  WHILE @curbyte > 0
+  BEGIN
+
+    SET @varbin =
+      CAST(
+        CASE SUBSTRING(@hexstr, @curbyte * 2, 1)
+          WHEN '0' THEN 0x00
+          WHEN '1' THEN 0x01
+          WHEN '2' THEN 0x02
+          WHEN '3' THEN 0x03
+          WHEN '4' THEN 0x04
+          WHEN '5' THEN 0x05
+          WHEN '6' THEN 0x06
+          WHEN '7' THEN 0x07
+          WHEN '8' THEN 0x08
+          WHEN '9' THEN 0x09
+          WHEN 'A' THEN 0x0A
+          WHEN 'B' THEN 0x0B
+          WHEN 'C' THEN 0x0C
+          WHEN 'D' THEN 0x0D
+          WHEN 'E' THEN 0x0E
+          WHEN 'F' THEN 0x0F
+        END |
+        CAST(
+          CASE SUBSTRING(@hexstr, @curbyte * 2 - 1, 1)
+            WHEN '0' THEN 0x00
+            WHEN '1' THEN 0x10
+            WHEN '2' THEN 0x20
+            WHEN '3' THEN 0x30
+            WHEN '4' THEN 0x40
+            WHEN '5' THEN 0x50
+            WHEN '6' THEN 0x60
+            WHEN '7' THEN 0x70
+            WHEN '8' THEN 0x80
+            WHEN '9' THEN 0x90
+            WHEN 'A' THEN 0xA0
+            WHEN 'B' THEN 0xB0
+            WHEN 'C' THEN 0xC0
+            WHEN 'D' THEN 0xD0
+            WHEN 'E' THEN 0xE0
+            WHEN 'F' THEN 0xF0
+          END AS tinyint) AS binary(1))
+      + @varbin
+    SET @curbyte = @curbyte - 1
+  END
+
+  RETURN CAST(@varbin AS INT)
+
+END
