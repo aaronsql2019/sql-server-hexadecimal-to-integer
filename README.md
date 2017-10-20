@@ -9,4 +9,8 @@ SELECT dbo.udfHex2Int('FF03') -- 65283
 SELECT dbo.udfHex2Int('5544') -- 21828
 ```
 
+![Digital Colony](dc_03_700.jpg)
+
+This was the logo for my website back in 2003.
+
 _created: 2003 or 2004_
